@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e1e1e">
+<meta name="description" content="Protótipo funcional do AjudAIme com as melhorias do teste de usabilidade.">
+<title>AjudAIme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: o protótipo do Figma dentro de um celular, sobre o fundo escuro do canvas do Figma.
+   No celular de verdade, o app ocupa a tela inteira. Tema único e claro no app, como no Figma (escolha deliberada). */
+:root{
+  --canvas:#1e1e1e; --canvas-fg:#ececec; --canvas-muted:#a7a7a7; --canvas-line:#3b3b3b;
+  --bg:#f2f3f5; --surface:#ffffff; --ink:#1b1f24; --muted:#4a5462; --line:#c6ccd4; --off:#eef0f3;
+  --navy:#0b5a87; --navy-press:#08466a; --sky:#dcebf6;
+  --yellow:#f3c744; --green:#1d7a46; --green-bg:#e4f2e8; --red:#b42318;
+  --font:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--navy);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.i{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- palco (desktop) ---------- */
+.stage{height:100%;display:flex;align-items:center;justify-content:center;gap:56px;padding-block:20px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+.device-col{height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.phone{width:390px;height:min(844px, 100%);border:10px solid #0b0b0b;border-radius:48px;overflow:hidden;background:var(--bg);box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative}
+
+/* ---------- app ---------- */
+.app{height:100%;display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.statusbar{flex:none;height:46px;display:flex;align-items:center;justify-content:space-between;padding:4px 28px 0;font-size:15px;font-weight:700;background:var(--bg)}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.topbar{flex:none;display:flex;align-items:center;gap:12px;min-height:66px;padding:6px 16px;border-bottom:1.5px solid var(--line);background:var(--bg)}
+.topbar h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.2}
+.topbar h1:focus{outline:none}
+.back{width:48px;height:48px;flex:none;border-radius:50%;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);display:grid;place-items:center}
+.back:active{background:var(--off)}
+.screens{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.inner{min-height:100%;display:flex;flex-direction:column;gap:16px;padding-block:20px 28px;padding-left:max(20px, env(safe-area-inset-left,0px));padding-right:max(20px, env(safe-area-inset-right,0px))}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px;border-top:1.5px solid var(--line);background:var(--surface)}
+.tab{min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-size:15px;font-weight:600}
+.tab[aria-current="page"]{background:var(--sky);color:var(--navy);font-weight:800}
+
+/* elementos comuns */
+h2,h3{margin:0}
+.lead{margin:0;font-size:17px;color:var(--muted);line-height:1.45}
+.card{background:var(--surface);border:1.5px solid var(--ink);border-radius:14px;padding:16px}
+.btn{width:100%;min-height:56px;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--ink);font-size:17px;font-weight:700;line-height:1.2;text-align:center}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:active{background:var(--navy-press)}
+.btn-secondary{background:var(--surface);color:var(--navy)}
+.btn-secondary:active{background:var(--off)}
+.linkbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;border:0;background:none;color:var(--navy);font-size:17px;font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.actions{margin-top:auto;display:flex;flex-direction:column;gap:12px;padding-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;padding:5px 10px;border-radius:999px;font-size:15px;font-weight:700;background:var(--green-bg);color:var(--green);border:1.5px solid var(--green)}
+.chip .i{width:18px;height:18px}
+.bigcheck{width:96px;height:96px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center}
+.bigcheck .i{width:52px;height:52px;stroke-width:3}
+.success{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:30px 18px}
+.success h2{font-size:24px;font-weight:800;letter-spacing:-.01em}
+.success p{margin:0;font-size:17px;line-height:1.5;color:var(--ink)}
+.toast{position:absolute;left:16px;right:16px;top:12px;z-index:40;background:var(--ink);color:#fff;padding:14px 16px;border-radius:12px;font-size:16px;font-weight:600;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+/* home */
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--yellow);padding:12px max(20px, env(safe-area-inset-right,0px)) 12px max(20px, env(safe-area-inset-left,0px));border-bottom:1.5px solid var(--ink);font-weight:800;font-size:16px}
+.banner .l{display:flex;align-items:center;gap:10px}
+.banner .r{font-size:15px;font-weight:700}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding-top:6px}
+.hero h2{font-size:20px;font-weight:800;line-height:1.3;text-wrap:balance;max-width:20ch}
+.mic{width:148px;height:148px;border-radius:50%;border:3px solid var(--ink);background:var(--navy);color:#fff;display:grid;place-items:center;box-shadow:0 6px 0 rgba(27,31,36,.18);transition:transform .1s}
+.mic:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(27,31,36,.18);background:var(--navy-press)}
+.mic .i{width:58px;height:58px;stroke-width:1.8}
+.mic-label{font-size:19px;font-weight:800}
+.list{display:flex;flex-direction:column;gap:12px}
+.row{width:100%;min-height:68px;display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;color:var(--ink);text-align:left}
+.row:active{background:var(--off)}
+.row .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .t{font-size:17px;font-weight:700}
+.row .s{font-size:16px;color:var(--muted)}
+.row .s.ok{color:var(--green);font-weight:600}
+.row .chev{color:var(--muted)}
+.remind{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--green-bg);border:1.5px solid var(--green);color:var(--ink);font-size:16px;text-align:left;width:100%}
+.remind .i{color:var(--green)}
+#s-home .inner{min-height:0}
+.reset{align-self:center;margin-top:4px;border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline;min-height:44px}
+
+/* ouvindo / digitar / assistente */
+.listen{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding-top:8px}
+.pulse{position:relative;width:148px;height:148px;display:grid;place-items:center}
+.pulse .mic{position:relative;z-index:1;box-shadow:none}
+.listen h2{font-size:26px;font-weight:800;letter-spacing:-.01em}
+.listen .sub{margin:-8px 0 0;font-size:18px;color:var(--muted)}
+.transcript{width:100%;min-height:92px;text-align:left;font-size:18px;line-height:1.5}
+.transcript .ph{color:var(--muted)}
+.note{margin:0;font-size:15px;color:var(--muted);line-height:1.45}
+.said{background:var(--surface);border:1.5px solid var(--ink);border-radius:14px;padding:14px 16px;font-size:17px;line-height:1.45}
+.said b{display:block;font-size:15px;font-weight:700;color:var(--muted);margin-bottom:2px}
+.processing{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 16px}
+.spin{display:flex;align-items:center;gap:10px;font-size:17px;color:var(--muted)}
+.spin::before{content:"";width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--navy);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result{background:var(--green-bg);border:2px solid var(--green);border-radius:16px;padding:22px 16px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.result .bigcheck{width:64px;height:64px}
+.result .bigcheck .i{width:34px;height:34px}
+.result h2{font-size:24px;font-weight:800;line-height:1.25;text-wrap:balance}
+.result .where{margin:0;font-size:18px;font-weight:600}
+.info{width:100%;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:12px 14px;text-align:left;font-size:16px}
+.info div{display:flex;gap:10px;align-items:flex-start}
+.info .i{color:var(--navy);width:22px;height:22px;margin-top:1px}
+form{display:flex;flex-direction:column;gap:12px}
+label.big{font-size:18px;font-weight:800}
+textarea{width:100%;min-height:150px;resize:vertical;padding:14px;border-radius:12px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font:500 18px/1.45 var(--font)}
+textarea:focus{outline:3px solid var(--navy);outline-offset:2px}
+.err{margin:0;color:var(--red);font-weight:700;font-size:16px}
+.sugs{display:flex;flex-wrap:wrap;gap:8px}
+.sug{min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--navy);background:var(--sky);color:var(--navy);font-size:15px;font-weight:600;text-align:left}
+
+/* documentos */
+.progress{display:flex;flex-direction:column;gap:8px}
+.progress .count{font-size:17px;font-weight:700}
+.progress .count.done{color:var(--green)}
+.bar{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bar span{height:8px;border-radius:4px;background:#d5dae0}
+.bar span.on{background:var(--green)}
+.doc{display:flex;gap:14px;align-items:flex-start}
+.doc.done{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.doc-ic{width:64px;height:64px;flex:none;border-radius:10px;background:var(--sky);border:1.5px solid var(--navy);color:var(--navy);display:grid;place-items:center}
+.doc-ic .i{width:32px;height:32px;stroke-width:1.7}
+.doc .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.doc .t{font-size:18px;font-weight:800;line-height:1.25}
+.doc .s{font-size:16px;color:var(--muted)}
+.check{display:flex;align-items:center;gap:12px;min-height:52px;margin-top:6px;padding:4px 0;border:0;background:none;color:var(--muted);font-size:17px;font-weight:600;text-align:left}
+.box{width:32px;height:32px;flex:none;border-radius:8px;border:2px solid #8a929c;background:var(--off);display:grid;place-items:center;color:transparent}
+.box .i{width:22px;height:22px;stroke-width:3}
+.check[aria-checked="true"]{color:var(--green);font-weight:800}
+.check[aria-checked="true"] .box{background:var(--green);border-color:var(--green);color:#fff}
+.lembrete h3{font-size:18px;font-weight:800}
+.lembrete .when{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:18px;font-weight:600}
+.lembrete .when .i{color:var(--navy)}
+.lembrete .set{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--green);font-weight:700}
+.lembrete .btn{margin-top:12px}
+
+/* bottom sheet */
+.overlay{position:absolute;inset:0;z-index:30;background:rgba(15,20,25,.45);display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:90%;overflow-y:auto;background:var(--surface);border-top:1.5px solid var(--ink);border-radius:20px 20px 0 0;padding:20px max(20px, env(safe-area-inset-right,0px)) 20px max(20px, env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h2{font-size:21px;font-weight:800}
+.sheet h3{font-size:16px;font-weight:800;color:var(--muted);letter-spacing:.02em}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts.hours{grid-template-columns:repeat(4,1fr)}
+.opt{min-height:56px;border-radius:10px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font-size:17px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;padding:6px}
+.opt small{font-size:15px;font-weight:500;color:var(--muted)}
+.opt[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.opt[aria-pressed="true"] small{color:#d6e6f2}
+
+/* mapa */
+.search{display:flex;align-items:center;gap:10px;min-height:54px;padding:0 14px;background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;color:var(--muted)}
+.search:focus-within{outline:3px solid var(--navy);outline-offset:2px}
+.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font:500 17px var(--font)}
+.dropdown{width:100%;min-height:54px;display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:12px;border:1.5px solid var(--navy);background:var(--sky);color:var(--navy);font-size:17px;font-weight:800;text-align:left}
+.dropdown .chev{margin-left:auto;transition:transform .2s}
+.dropdown[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.places{display:flex;flex-direction:column;border:1.5px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--surface)}
+.place{display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 14px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);text-align:left}
+.place:last-child{border-bottom:0}
+.place[aria-selected="true"]{background:var(--sky)}
+.place .txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.place .t{font-weight:700;font-size:17px}
+.place .s{font-size:15px;color:var(--muted)}
+.place .d{font-size:15px;font-weight:700;color:var(--navy);white-space:nowrap}
+.empty{padding:14px;font-size:16px;color:var(--muted)}
+.mapbox{border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;background:#e3e6ea}
+.mapbox svg{display:block;width:100%;height:auto}
+.pin{cursor:pointer}
+.pin:focus{outline:none}
+.pin:focus-visible .lbl{stroke:var(--navy);stroke-width:3}
+.route{fill:none;stroke:var(--navy);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2 10}
+.placecard{display:flex;flex-direction:column;gap:12px}
+.placecard .head{display:flex;gap:12px;align-items:flex-start}
+.placecard .head .i{width:30px;height:30px;color:var(--ink);stroke-width:1.7}
+.placecard .t{font-size:19px;font-weight:800;line-height:1.25}
+.placecard .s{font-size:16px;color:var(--muted)}
+.placecard .lines{display:flex;flex-direction:column;gap:6px;font-size:16px}
+.placecard .lines div{display:flex;gap:8px;align-items:flex-start}
+.placecard .lines .i{width:20px;height:20px;color:var(--navy);margin-top:1px}
+.steps{margin:0;padding:12px 14px 12px 34px;background:var(--off);border-radius:10px;display:flex;flex-direction:column;gap:8px;font-size:16px;line-height:1.45}
+.steps-title{font-size:16px;font-weight:800}
+
+/* listas simples (benefícios, vagas) */
+.item{display:flex;flex-direction:column;gap:6px}
+.item .t{font-size:18px;font-weight:800}
+.item .s{font-size:16px;color:var(--muted)}
+.tag{align-self:flex-start;padding:3px 10px;border-radius:999px;font-size:15px;font-weight:700;background:var(--sky);color:var(--navy)}
+
+@media (max-width:899px){ @media (max-width:519px){
+  .stage{padding:0;gap:0}
+  .device-col{width:100%;gap:0}
+  .statusbar{display:none}
+  .phone{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 10.5v.5a7 7 0 0 0 14 0v-.5M12 18v3.5M8.5 21.5h7"/></symbol>
+  <symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M3 3l18 18M8.6 16.4a4.8 4.8 0 0 1 6.8 0M5.2 12.9a9.6 9.6 0 0 1 4.6-2.6M18.8 12.9a9.6 9.6 0 0 0-2-1.5M1.8 9.3a14.4 14.4 0 0 1 4-2.6M22.2 9.3A14.4 14.4 0 0 0 11 5.6M12 20h.01"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5.5l6.5 6.5L9 18.5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M5.5 9l6.5 6.5L18.5 9"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19.5 12h-15M11 5.5L4.5 12l6.5 6.5"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14.5h2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5s-7-6.1-7-11.2a7 7 0 0 1 14 0c0 5.1-7 11.2-7 11.2z"/><circle cx="12" cy="10.2" r="2.6"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M3 13h18"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4.5L3 6.5v13l6-2 6 2 6-2v-13l-6 2-6-2zM9 4.5v13M15 6.5v13"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11L12 3.5l8.5 7.5M5.5 9.5v11h5v-6h3v6h5v-11"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 17.2c.8-1.7 2.3-2.6 4-2.6s3.2.9 4 2.6"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20H4z"/><path d="M10 20v-5.5h4V20"/></symbol>
+  <symbol id="i-alarm" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 2M5 3L2.5 5.5M19 3l2.5 2.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10.5 21v-3h3v3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12L20 4l-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.6L4 8.5M4 3.5v5h5M4 13a8 8 0 0 0 14.3 4.6L20 15.5M20 20.5v-5h-5"/></symbol>
+</svg>
+
+<div class="stage">
+
+  <div class="device-col">
+    <div class="phone">
+      <div class="app" id="app">
+        <div class="statusbar" aria-hidden="true">
+          <span>9:41</span>
+          <span class="sys">
+            <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1b1f24"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#1b1f24"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#1b1f24"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1b1f24"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 11.5l2.4-2.9a3.6 3.6 0 0 0-4.8 0zM3.4 6.2a7 7 0 0 1 9.2 0l1.6-1.9a9.6 9.6 0 0 0-12.4 0zM.2 2.4a13.4 13.4 0 0 1 15.6 0" fill="#1b1f24"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#1b1f24" opacity=".5"/><rect x="2.5" y="2.5" width="18" height="7" rx="1.5" fill="#1b1f24"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="#1b1f24" opacity=".5"/></svg>
+          </span>
+        </div>
+
+        <header class="topbar" id="topbar" hidden>
+          <button class="back" type="button" id="btn-back" aria-label="Voltar"><svg class="i"><use href="#i-back"/></svg></button>
+          <h1 id="screen-title" tabindex="-1">Assistente Virtual</h1>
+        </header>
+
+        <div class="screens">
+          <!-- Tela 1: Home -->
+          <section class="screen" id="s-home" aria-label="Tela inicial">
+            <div class="banner" role="status">
+              <span class="l"><svg class="i"><use href="#i-wifioff"/></svg>Modo Offline</span>
+              <span class="r">Sem internet</span>
+            </div>
+            <div class="inner">
+              <div class="hero">
+                <h2>Toque no microfone e diga o que precisa</h2>
+                <button class="mic" type="button" id="btn-mic" aria-label="Toque e fale"><svg class="i"><use href="#i-mic"/></svg></button>
+                <div class="mic-label" aria-hidden="true">Toque e fale</div>
+                <button class="linkbtn" type="button" data-go="digitar"><svg class="i"><use href="#i-keyboard"/></svg>Prefiro digitar</button>
+              </div>
+              <button class="remind" type="button" id="home-remind" data-go="documentos" hidden>
+                <svg class="i"><use href="#i-alarm"/></svg><span id="home-remind-txt"></span>
+              </button>
+              <div class="list">
+                <button class="row" type="button" id="row-saved">
+                  <svg class="i"><use href="#i-map"/></svg>
+                  <span class="txt"><span class="t">Meu caminho salvo</span><span class="s" id="saved-sub">Nenhum caminho salvo ainda</span></span>
+                  <svg class="i chev"><use href="#i-right"/></svg>
+                </button>
+                <button class="row" type="button" data-go="beneficios">
+                  <svg class="i"><use href="#i-wallet"/></svg>
+                  <span class="txt"><span class="t">Meus Benefícios</span></span>
+                  <svg class="i chev"><use href="#i-right"/></svg>
+                </button>
+                <button class="row" type="button" data-go="mapa">
+                  <svg class="i"><use href="#i-pin"/></svg>
+                  <span class="txt"><span class="t">Mapa de Ajuda</span></span>
+                  <svg class="i chev"><use href="#i-right"/></svg>
+                </button>
+                <button class="row" type="button" data-go="vagas">
+                  <svg class="i"><use href="#i-bag"/></svg>
+                  <span class="txt"><span class="t">Vagas e Cursos</span></span>
+                  <svg class="i chev"><use href="#i-right"/></svg>
+                </button>
+              </div>
+              <button class="reset" type="button" id="btn-reset-home">Reiniciar demonstração</button>
+            </div>
+          </section>
+
+          <!-- Tela 2a: Ouvindo -->
+          <section class="screen" id="s-ouvindo" aria-label="Ouvindo" hidden>
+            <div class="inner">
+              <div class="listen">
+                <div class="pulse"><div class="mic" aria-hidden="true"><svg class="i"><use href="#i-mic"/></svg></div></div>
+                <h2 id="listen-title">Estou ouvindo...</h2>
+                <p class="sub" id="listen-sub">pode falar</p>
+                <div class="card transcript" aria-live="polite" id="transcript"><span class="ph">O que você falar aparece aqui.</span></div>
+                <p class="note" id="listen-note" hidden>Simulação: o protótipo mostra uma fala de exemplo.</p>
+              </div>
+              <div class="actions" id="listen-actions">
+                <button class="btn btn-secondary" type="button" id="btn-stop"><svg class="i"><use href="#i-stop"/></svg>Parar</button>
+              </div>
+              <div class="actions" id="listen-retry" hidden>
+                <button class="btn btn-primary" type="button" id="btn-retry"><svg class="i"><use href="#i-mic"/></svg>Falar de novo</button>
+                <button class="btn btn-secondary" type="button" data-go-replace="digitar"><svg class="i"><use href="#i-keyboard"/></svg>Prefiro digitar</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tela 2b: Digitar -->
+          <section class="screen" id="s-digitar" aria-label="Digitar" hidden>
+            <div class="inner">
+              <form id="form-digitar" novalidate>
+                <label class="big" for="pedido">O que você precisa?</label>
+                <textarea id="pedido" name="pedido" placeholder="Escreva o que você precisa"></textarea>
+                <p class="err" id="pedido-err" role="alert" hidden>Escreva o que você precisa para continuar.</p>
+                <p class="note">Ou toque em um exemplo:</p>
+                <div class="sugs">
+                  <button class="sug" type="button">Quero saber se tenho direito a um auxílio</button>
+                  <button class="sug" type="button">Preciso de ajuda com comida</button>
+                  <button class="sug" type="button">Onde fica o CRAS?</button>
+                </div>
+                <div class="actions">
+                  <button class="btn btn-primary" type="submit"><svg class="i"><use href="#i-send"/></svg>Enviar</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Tela 2: Assistente Virtual / Elegibilidade -->
+          <section class="screen" id="s-assistente" aria-label="Assistente Virtual" hidden>
+            <div class="inner">
+              <div class="said" id="said"><b id="said-label">Você disse:</b><span id="said-txt"></span></div>
+              <div class="card processing" id="processing" aria-live="polite">
+                <div class="spin" id="processing-txt">Processando sua fala...</div>
+              </div>
+              <div class="result" id="result" hidden>
+                <div class="bigcheck" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></div>
+                <h2 id="result-title" tabindex="-1">Você pode ter direito ao auxílio!</h2>
+                <p class="where">Atendimento no CRAS Esperança</p>
+                <div class="info">
+                  <div><svg class="i"><use href="#i-pin"/></svg><span>Rua das Flores, 120 · a 600 metros</span></div>
+                  <div><svg class="i"><use href="#i-clock"/></svg><span>Seg. a sex., das 8h às 17h</span></div>
+                </div>
+              </div>
+              <div class="actions" id="result-actions" hidden>
+                <button class="btn btn-primary" type="button" data-go="documentos"><svg class="i"><use href="#i-file"/></svg>Ver documentos para levar</button>
+                <button class="btn btn-secondary" type="button" id="btn-ver-caminho-res"><svg class="i"><use href="#i-route"/></svg>Ver caminho até o CRAS</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tela 3: Documentos Necessários -->
+          <section class="screen" id="s-documentos" aria-label="Documentos Necessários" hidden>
+            <div class="inner">
+              <p class="lead">Separe estes 2 documentos antes do atendimento.</p>
+              <div class="progress">
+                <div class="count" id="doc-count" aria-live="polite">0 de 2 documentos separados</div>
+                <div class="bar" aria-hidden="true"><span id="bar-0"></span><span id="bar-1"></span></div>
+              </div>
+              <div class="list" id="doc-list"></div>
+              <div class="card lembrete">
+                <h3>Lembrete para ir ao CRAS</h3>
+                <div class="when"><svg class="i"><use href="#i-cal"/></svg><span id="rem-when"></span></div>
+                <div class="set" id="rem-set" hidden><svg class="i"><use href="#i-check"/></svg><span>Lembrete marcado</span></div>
+                <button class="linkbtn" type="button" id="btn-trocar">Trocar dia e horário</button>
+                <button class="btn btn-primary" type="button" id="btn-lembrar"><svg class="i"><use href="#i-alarm"/></svg><span id="btn-lembrar-txt">Me lembrar de ir</span></button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tela 3b: Lembrete marcado -->
+          <section class="screen" id="s-lembrete" aria-label="Lembrete marcado" hidden>
+            <div class="inner">
+              <div class="card success">
+                <div class="bigcheck" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></div>
+                <h2>Lembrete marcado!</h2>
+                <p id="lembrete-txt"></p>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" type="button" id="btn-ver-caminho-lem"><svg class="i"><use href="#i-route"/></svg>Ver caminho até o CRAS</button>
+                <button class="btn btn-secondary" type="button" data-home><svg class="i"><use href="#i-home"/></svg>Voltar ao início</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tela 4: Mapa Local -->
+          <section class="screen" id="s-mapa" aria-label="Mapa Local" hidden>
+            <div class="inner">
+              <label class="search" for="busca">
+                <svg class="i"><use href="#i-search"/></svg>
+                <input id="busca" type="search" placeholder="Buscar serviço ou endereço" autocomplete="off">
+              </label>
+              <button class="dropdown" type="button" id="btn-locais" aria-expanded="false" aria-controls="places">
+                <svg class="i"><use href="#i-locate"/></svg>Locais Próximos<svg class="i chev"><use href="#i-down"/></svg>
+              </button>
+              <div class="places" id="places" role="listbox" aria-label="Locais próximos" hidden></div>
+              <div class="mapbox" id="mapbox"></div>
+              <div class="card placecard" id="placecard"></div>
+            </div>
+          </section>
+
+          <!-- Tela 4b: Caminho salvo -->
+          <section class="screen" id="s-salvo" aria-label="Caminho salvo" hidden>
+            <div class="inner">
+              <div class="card success">
+                <div class="bigcheck" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></div>
+                <h2>Caminho salvo!</h2>
+                <p id="salvo-txt"></p>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" type="button" id="btn-ver-agora"><svg class="i"><use href="#i-route"/></svg>Ver caminho agora</button>
+                <button class="btn btn-secondary" type="button" data-home><svg class="i"><use href="#i-home"/></svg>Voltar ao início</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Meus Benefícios -->
+          <section class="screen" id="s-beneficios" aria-label="Meus Benefícios" hidden>
+            <div class="inner" id="beneficios-inner"></div>
+          </section>
+
+          <!-- Vagas e Cursos -->
+          <section class="screen" id="s-vagas" aria-label="Vagas e Cursos" hidden>
+            <div class="inner">
+              <p class="lead">Oportunidades perto de você. Exemplos do protótipo.</p>
+              <div class="card item">
+                <span class="tag">Curso gratuito</span>
+                <span class="t">Informática básica</span>
+                <span class="s">CRAS Esperança · quartas-feiras, às 14h</span>
+              </div>
+              <div class="card item">
+                <span class="tag">Vaga de emprego</span>
+                <span class="t">Auxiliar de cozinha</span>
+                <span class="s">Restaurante Sabor da Vila · 2 vagas · 1,5 km</span>
+              </div>
+              <div class="card item">
+                <span class="tag">Curso gratuito</span>
+                <span class="t">Corte e costura</span>
+                <span class="s">ONG Apoio · terças e quintas, às 9h</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Trocar dia e horário -->
+          <div class="overlay" id="sheet" hidden>
+            <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+              <h2 id="sheet-title">Quando você vai ao CRAS?</h2>
+              <h3>Dia</h3>
+              <div class="opts" id="opt-days"></div>
+              <h3>Manhã</h3>
+              <div class="opts hours" id="opt-am"></div>
+              <h3>Tarde</h3>
+              <div class="opts hours" id="opt-pm"></div>
+              <p class="note">O CRAS atende de segunda a sexta, das 8h às 17h.</p>
+              <button class="btn btn-primary" type="button" id="btn-sheet-ok"><svg class="i"><use href="#i-check"/></svg>Confirmar dia e horário</button>
+              <button class="btn btn-secondary" type="button" id="btn-sheet-cancel">Cancelar</button>
+            </div>
+          </div>
+
+          <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <nav class="tabbar" id="tabbar" aria-label="Navegação principal" hidden>
+          <button class="tab" type="button" data-tab="home"><svg class="i"><use href="#i-home"/></svg>Início</button>
+          <button class="tab" type="button" data-tab="documentos"><svg class="i"><use href="#i-file"/></svg>Documentos</button>
+          <button class="tab" type="button" data-tab="mapa"><svg class="i"><use href="#i-map"/></svg>Mapa</button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  var STANDALONE = (function () { try { return window.top === window.self; } catch (e) { return false; } })();
+  var STORE = "ajudaime-prototipo-v1";
+  var EXEMPLO = "Acho que tenho direito a um auxílio, mas não sei por onde começar.";
+
+  var SCREENS = {
+    home:       { title: "", label: "Tela 1 — Home / Modo Offline" },
+    ouvindo:    { title: "Assistente Virtual", label: "Tela 2a — Ouvindo" },
+    digitar:    { title: "Assistente Virtual", label: "Tela 2b — Digitar" },
+    assistente: { title: "Assistente Virtual", label: "Tela 2 — Assistente Virtual / Elegibilidade" },
+    documentos: { title: "Documentos Necessários", label: "Tela 3 — Documentos Necessários", tab: "documentos" },
+    lembrete:   { title: "Lembrete", label: "Tela 3b — Lembrete marcado", tab: "documentos" },
+    mapa:       { title: "Mapa Local", label: "Tela 4 — Mapa Local / Serviços", tab: "mapa" },
+    salvo:      { title: "Mapa Local", label: "Tela 4b — Caminho salvo", tab: "mapa" },
+    beneficios: { title: "Meus Benefícios", label: "Meus Benefícios" },
+    vagas:      { title: "Vagas e Cursos", label: "Vagas e Cursos" }
+  };
+
+  var DOCS = [
+    { id: "rg", nome: "Carteira de Identidade", dica: "RG ou outro documento com foto", icon: "i-id" },
+    { id: "comp", nome: "Comprovante de Residência", dica: "Conta de luz ou de água recente", icon: "i-house" }
+  ];
+
+  var PLACES = {
+    cras:  { nome: "CRAS Esperança", short: "CRAS", tipo: "Assistência social", dist: "600 metros", tempo: "8 min a pé",
+             end: "Rua das Flores, 120", hor: "Atendimento: seg. a sex., das 8h às 17h", x: 206, y: 56, lw: 50,
+             route: "M60 178 L60 140 L150 140 L150 62 L206 62",
+             steps: ["Siga pela Rua A até a Av. Central (100 m).", "Vire à direita na Av. Central e siga 250 m.", "Vire à esquerda na Rua das Flores. O CRAS fica no nº 120 (250 m)."] },
+    vida:  { nome: "ONG Vida", short: "ONG Vida", tipo: "Doação de alimentos", dist: "850 metros", tempo: "11 min a pé",
+             end: "Av. Brasil, 455", hor: "Atendimento: seg. a sáb., das 9h às 18h", x: 60, y: 92, lw: 70,
+             route: "M60 178 L60 98",
+             steps: ["Siga em frente pela Rua A por 500 m.", "Atravesse a Rua Boa Vista na faixa de pedestres.", "A ONG Vida fica na Av. Brasil, 455, à esquerda (350 m)."] },
+    apoio: { nome: "ONG Apoio", short: "ONG Apoio", tipo: "Roupas e orientação", dist: "1,2 km", tempo: "15 min a pé",
+             end: "Rua do Comércio, 78", hor: "Atendimento: ter. a sex., das 13h às 17h", x: 296, y: 96, lw: 76,
+             route: "M60 178 L60 140 L250 140 L250 100 L296 100",
+             steps: ["Siga pela Rua A até a Av. Central (100 m).", "Vire à direita e siga 700 m até a Rua do Comércio.", "Vire à esquerda. A ONG Apoio fica no nº 78 (400 m)."] }
+  };
+  var ORDER = ["cras", "vida", "apoio"];
+
+  var DIAS = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+
+  /* ---------- estado ---------- */
+  var state;
+  function freshState() {
+    return { said: "", via: "voz", eligible: false, docs: { rg: false, comp: false }, reminder: null,
+             draft: null, saved: [], lastSaved: null, selected: "cras", routeMode: false };
+  }
+  function load() {
+    state = freshState();
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) {
+        var s = JSON.parse(raw);
+        ["said", "via", "eligible", "reminder", "saved", "lastSaved"].forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+        if (s.docs) { state.docs.rg = !!s.docs.rg; state.docs.comp = !!s.docs.comp; }
+      }
+    } catch (e) { /* sem armazenamento: segue com o estado inicial */ }
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify({ said: state.said, via: state.via, eligible: state.eligible, docs: state.docs,
+        reminder: state.reminder, saved: state.saved, lastSaved: state.lastSaved }));
+    } catch (e) { /* ignora */ }
+  }
+
+  /* ---------- datas ---------- */
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function iso(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function fromIso(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2], 12); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function diasUteis(n) {
+    var out = [], d = new Date(); d.setHours(12, 0, 0, 0);
+    while (out.length < n) { d.setDate(d.getDate() + 1); var w = d.getDay(); if (w > 0 && w < 6) out.push(iso(d)); }
+    return out;
+  }
+  function diaPadrao() {
+    var dias = diasUteis(6);
+    for (var i = 0; i < dias.length; i++) { if (fromIso(dias[i]).getDay() === 4) return dias[i]; }
+    return dias[0];
+  }
+  function fmtDia(s) { var d = fromIso(s); return cap(DIAS[d.getDay()]) + ", " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1); }
+  function fmtDiaMin(s) { var d = fromIso(s); return DIAS[d.getDay()] + ", " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1); }
+  function fmtLembrete(r) { return fmtDia(r.day) + ", às " + r.hour + "h"; }
+
+  /* ---------- navegação ---------- */
+  var stack = ["home"];
+  var timers = [];
+  var rec = null;
+  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function every(fn, ms) { var t = setInterval(fn, ms); timers.push(t); return t; }
+  function cleanup() {
+    timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+    timers = [];
+    if (rec) { try { rec.onend = null; rec.onerror = null; rec.onresult = null; rec.abort(); } catch (e) {} rec = null; }
+    closeSheet();
+    var tt = $("#toast"); if (tt) tt.hidden = true;
+  }
+
+  function go(name, params, opts) {
+    params = params || {}; opts = opts || {};
+    cleanup();
+    if (opts.replace) {
+      if (stack.length > 1 && stack[stack.length - 2] === name) { stack.pop(); }
+      else { stack[stack.length - 1] = name; }
+      if (STANDALONE) { try { history.replaceState({ n: stack.length }, ""); } catch (e) {} }
+    } else {
+      stack.push(name);
+      if (STANDALONE) { try { history.pushState({ n: stack.length }, ""); } catch (e) {} }
+    }
+    show(name, params);
+  }
+  function goHome() {
+    cleanup();
+    stack = ["home"];
+    if (STANDALONE) { try { history.pushState({ n: 1 }, ""); } catch (e) {} }
+    show("home", {});
+  }
+  function appBack() {
+    cleanup();
+    if (stack.length > 1) stack.pop();
+    show(stack[stack.length - 1], { fromBack: true });
+  }
+  function back() {
+    if (stack.length <= 1) return;
+    if (STANDALONE) { try { history.back(); return; } catch (e) {} }
+    appBack();
+  }
+  window.addEventListener("popstate", function () { if (stack.length > 1) appBack(); });
+
+  function show(name, params) {
+    var meta = SCREENS[name];
+    $$(".screen").forEach(function (s) { s.hidden = s.id !== "s-" + name; });
+    var isHome = name === "home";
+    $("#topbar").hidden = isHome;
+    $("#tabbar").hidden = isHome;
+    $("#screen-title").textContent = meta.title;
+    $$(".tab").forEach(function (t) {
+      var active = t.getAttribute("data-tab") === meta.tab;
+      if (active) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
+    });
+    var renderers = { home: renderHome, ouvindo: startListening, digitar: renderDigitar, assistente: renderAssistente,
+      documentos: renderDocs, lembrete: renderLembrete, mapa: renderMapa, salvo: renderSalvo, beneficios: renderBeneficios };
+    if (renderers[name]) renderers[name](params);
+    var scr = $("#s-" + name); if (scr) scr.scrollTop = 0;
+    if (!isHome && !params.noFocus) { try { $("#screen-title").focus({ preventScroll: true }); } catch (e) {} }
+  }
+
+  /* ---------- toast ---------- */
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("#toast");
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 3200);
+  }
+
+  /* ---------- Tela 1: Home ---------- */
+  function renderHome() {
+    var sub = $("#saved-sub");
+    if (state.lastSaved && PLACES[state.lastSaved]) {
+      sub.textContent = PLACES[state.lastSaved].nome + " · funciona sem internet";
+      sub.className = "s ok";
+    } else {
+      sub.textContent = "Nenhum caminho salvo ainda";
+      sub.className = "s";
+    }
+    var r = $("#home-remind");
+    if (state.reminder) {
+      r.hidden = false;
+      $("#home-remind-txt").textContent = "Lembrete: " + fmtLembrete(state.reminder) + " · CRAS Esperança";
+    } else { r.hidden = true; }
+  }
+
+  /* ---------- Tela 2a: Ouvindo ---------- */
+  var transcript = "";
+  function setTranscript(txt) {
+    var el = $("#transcript");
+    if (txt) { el.textContent = "“" + txt + "”"; } else { el.innerHTML = '<span class="ph">O que você falar aparece aqui.</span>'; }
+  }
+  function startListening() {
+    transcript = "";
+    setTranscript("");
+    $("#listen-title").textContent = "Estou ouvindo...";
+    $("#listen-sub").textContent = "pode falar";
+    $("#listen-note").hidden = true;
+    $("#listen-actions").hidden = false;
+    $("#listen-retry").hidden = true;
+
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (STANDALONE && SR) {
+      try {
+        var r = new SR();
+        r.lang = "pt-BR"; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+        r.onresult = function (e) {
+          var t = "";
+          for (var i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+          transcript = t; setTranscript(t);
+        };
+        r.onerror = function (e) {
+          rec = null;
+          if (e.error === "no-speech") { naoOuvi(); } else { simulate(); }
+        };
+        r.onend = function () { if (rec === r) { rec = null; if (transcript.trim()) finishListening(); else naoOuvi(); } };
+        var started = false;
+        r.onaudiostart = function () { started = true; };
+        rec = r;
+        r.start();
+        // Se o microfone não abrir em 4 s (permissão pendente ou navegador sem suporte), usa a simulação.
+        later(function () {
+          if (rec === r && !started) {
+            rec = null;
+            try { r.onend = null; r.onerror = null; r.onresult = null; r.abort(); } catch (e) {}
+            simulate();
+          }
+        }, 4000);
+        later(function () { if (rec === r) { try { r.stop(); } catch (e) {} } }, 15000);
+        return;
+      } catch (err) { rec = null; }
+    }
+    simulate();
+  }
+  function simulate() {
+    $("#listen-note").hidden = false;
+    var words = EXEMPLO.split(" "), i = 0;
+    later(function () {
+      every(function () {
+        i++;
+        transcript = words.slice(0, i).join(" ");
+        setTranscript(transcript);
+        if (i >= words.length) {
+          timers.forEach(function (t) { clearInterval(t); });
+          later(finishListening, 1300);
+        }
+      }, 230);
+    }, 800);
+  }
+  function naoOuvi() {
+    $("#listen-title").textContent = "Não consegui ouvir";
+    $("#listen-sub").textContent = "Fale perto do celular ou escolha digitar.";
+    $("#listen-actions").hidden = true;
+    $("#listen-retry").hidden = false;
+  }
+  function stopListening() {
+    if (rec) { try { rec.stop(); } catch (e) {} return; }
+    var words = transcript.trim().split(/\s+/).filter(Boolean);
+    transcript = words.length >= 4 ? transcript : EXEMPLO;
+    finishListening();
+  }
+  function finishListening() {
+    state.said = (transcript || EXEMPLO).trim();
+    state.via = "voz";
+    save();
+    go("assistente", { fresh: true }, { replace: true });
+  }
+
+  /* ---------- Tela 2b: Digitar ---------- */
+  function renderDigitar() {
+    $("#pedido-err").hidden = true;
+    later(function () { try { $("#pedido").focus(); } catch (e) {} }, 50);
+  }
+
+  /* ---------- Tela 2: Assistente ---------- */
+  function renderAssistente(params) {
+    $("#said-label").textContent = state.via === "texto" ? "Você escreveu:" : "Você disse:";
+    $("#said-txt").textContent = state.said || EXEMPLO;
+    var proc = $("#processing"), res = $("#result"), act = $("#result-actions");
+    if (params.fresh) {
+      $("#processing-txt").textContent = state.via === "texto" ? "Processando sua mensagem..." : "Processando sua fala...";
+      proc.hidden = false; res.hidden = true; act.hidden = true;
+      later(function () {
+        state.eligible = true; save();
+        proc.hidden = true; res.hidden = false; act.hidden = false;
+        try { $("#result-title").focus({ preventScroll: true }); } catch (e) {}
+      }, 1700);
+    } else {
+      proc.hidden = true; res.hidden = false; act.hidden = false;
+    }
+  }
+
+  /* ---------- Tela 3: Documentos ---------- */
+  function renderDocs() {
+    var list = $("#doc-list");
+    list.innerHTML = "";
+    DOCS.forEach(function (d) {
+      var on = !!state.docs[d.id];
+      var card = document.createElement("div");
+      card.className = "card doc" + (on ? " done" : "");
+      card.innerHTML =
+        '<div class="doc-ic" aria-hidden="true"><svg class="i"><use href="#' + d.icon + '"/></svg></div>' +
+        '<div class="txt"><span class="t">' + d.nome + '</span><span class="s">' + d.dica + '</span>' +
+        '<button class="check" type="button" role="checkbox" aria-checked="' + on + '" data-doc="' + d.id + '">' +
+        '<span class="box"><svg class="i"><use href="#i-check"/></svg></span>' +
+        '<span>' + (on ? "Já separei" : "Toque quando separar") + '</span></button></div>';
+      list.appendChild(card);
+    });
+    var n = DOCS.filter(function (d) { return state.docs[d.id]; }).length;
+    var c = $("#doc-count");
+    c.textContent = n === DOCS.length ? "Tudo pronto: 2 de 2 documentos separados" : n + " de 2 documentos separados";
+    c.className = "count" + (n === DOCS.length ? " done" : "");
+    $("#bar-0").className = n >= 1 ? "on" : "";
+    $("#bar-1").className = n >= 2 ? "on" : "";
+
+    if (!state.draft) state.draft = state.reminder ? { day: state.reminder.day, hour: state.reminder.hour } : { day: diaPadrao(), hour: 9 };
+    $("#rem-when").textContent = fmtLembrete(state.draft);
+    var marcado = state.reminder && state.reminder.day === state.draft.day && state.reminder.hour === state.draft.hour;
+    $("#rem-set").hidden = !marcado;
+    $("#btn-lembrar-txt").textContent = marcado ? "Ver lembrete" : (state.reminder ? "Atualizar lembrete" : "Me lembrar de ir");
+  }
+  function toggleDoc(id) {
+    state.docs[id] = !state.docs[id];
+    save();
+    renderDocs();
+    var btn = document.querySelector('[data-doc="' + id + '"]');
+    if (btn) btn.focus();
+  }
+
+  /* ---------- Trocar dia e horário ---------- */
+  var sel = null;
+  function openSheet() {
+    sel = { day: state.draft.day, hour: state.draft.hour };
+    var days = diasUteis(6);
+    if (days.indexOf(sel.day) < 0) sel.day = days[0];
+    $("#opt-days").innerHTML = days.map(function (d) {
+      var x = fromIso(d);
+      return '<button class="opt" type="button" data-day="' + d + '" aria-pressed="' + (d === sel.day) + '">' +
+        cap(DIAS[x.getDay()]) + '<small>' + pad(x.getDate()) + "/" + pad(x.getMonth() + 1) + "</small></button>";
+    }).join("");
+    function hours(list) {
+      return list.map(function (h) {
+        return '<button class="opt" type="button" data-hour="' + h + '" aria-pressed="' + (h === sel.hour) + '">' + h + "h</button>";
+      }).join("");
+    }
+    $("#opt-am").innerHTML = hours([8, 9, 10, 11]);
+    $("#opt-pm").innerHTML = hours([13, 14, 15, 16]);
+    $("#sheet").hidden = false;
+    try { $("#sheet-title").setAttribute("tabindex", "-1"); $("#sheet-title").focus(); } catch (e) {}
+  }
+  function closeSheet() { var s = $("#sheet"); if (s) s.hidden = true; }
+  function pick(attr, val) {
+    $$("#sheet [data-" + attr + "]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-" + attr) === String(val))); });
+  }
+
+  /* ---------- Tela 3b: Lembrete ---------- */
+  function renderLembrete() {
+    var r = state.reminder;
+    if (!r) return;
+    $("#lembrete-txt").textContent = "Vamos avisar você na " + fmtDiaMin(r.day) + ", às " + (r.hour - 1) +
+      "h, para ir ao CRAS Esperança às " + r.hour + "h.";
+  }
+
+  /* ---------- Tela 4: Mapa ---------- */
+  function norm(s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  function matches(q) {
+    if (!q) return ORDER.slice();
+    var n = norm(q);
+    return ORDER.filter(function (id) { var p = PLACES[id]; return norm(p.nome + " " + p.tipo + " " + p.end + " " + p.short).indexOf(n) >= 0; });
+  }
+  function renderPlaces(ids) {
+    var box = $("#places");
+    if (!ids.length) { box.innerHTML = '<div class="empty">Nenhum local encontrado. Tente "CRAS" ou "alimentos".</div>'; return; }
+    box.innerHTML = ids.map(function (id) {
+      var p = PLACES[id];
+      return '<button class="place" type="button" role="option" data-place="' + id + '" aria-selected="' + (id === state.selected) + '">' +
+        '<svg class="i"><use href="#i-pin"/></svg><span class="txt"><span class="t">' + p.nome + '</span><span class="s">' + p.tipo +
+        '</span></span><span class="d">' + p.dist + "</span></button>";
+    }).join("");
+  }
+  function setList(open) {
+    $("#places").hidden = !open;
+    $("#btn-locais").setAttribute("aria-expanded", String(open));
+    if (open) renderPlaces(matches($("#busca").value.trim()));
+  }
+  function mapSvg() {
+    var s = PLACES[state.selected];
+    var out = '<svg viewBox="0 0 340 214" role="group" aria-label="Mapa com CRAS Esperança, ONG Vida e ONG Apoio">' +
+      '<rect width="340" height="214" fill="#e3e6ea"/>' +
+      '<rect x="78" y="14" width="56" height="56" rx="8" fill="#d3d8de"/><rect x="170" y="80" width="64" height="44" rx="8" fill="#d3d8de"/>' +
+      '<rect x="266" y="14" width="60" height="34" rx="8" fill="#d3d8de"/><rect x="170" y="156" width="64" height="44" rx="8" fill="#d3d8de"/>' +
+      '<rect x="80" y="156" width="54" height="44" rx="8" fill="#cfe3d3"/><rect x="266" y="156" width="60" height="44" rx="8" fill="#d3d8de"/>' +
+      '<rect x="4" y="14" width="40" height="70" rx="8" fill="#d3d8de"/>' +
+      '<g stroke="#ffffff" stroke-width="14" stroke-linecap="square" fill="none">' +
+      '<path d="M0 140H340"/><path d="M60 70V214"/><path d="M150 0V214"/><path d="M150 62H340"/><path d="M250 62V214"/><path d="M250 100H340"/>' +
+      "</g>";
+    if (state.routeMode) out += '<path class="route" d="' + s.route + '"/>';
+    out += '<g aria-hidden="true"><circle cx="60" cy="178" r="11" fill="#0b5a87" opacity=".18"/><circle cx="60" cy="178" r="6.5" fill="#0b5a87" stroke="#fff" stroke-width="2.5"/>' +
+      '<rect x="72" y="170" width="44" height="18" rx="5" fill="#fff" stroke="#1b1f24" stroke-width="1"/><text x="94" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#1b1f24" font-family="Inter, Arial, sans-serif">Você</text></g>';
+    ORDER.forEach(function (id) {
+      var p = PLACES[id], on = id === state.selected;
+      var fill = on ? "#0b5a87" : "#ffffff", txt = on ? "#ffffff" : "#1b1f24";
+      out += '<g class="pin" role="button" tabindex="0" data-place="' + id + '" aria-label="' + p.nome + ", " + p.dist + '">' +
+        '<path d="M' + p.x + " " + p.y + " c-6 -7 -10 -11 -10 -16 a10 10 0 0 1 20 0 c0 5 -4 9 -10 16z\" fill=\"" + (on ? "#0b5a87" : "#ffffff") +
+        '" stroke="#1b1f24" stroke-width="1.6"/><circle cx="' + p.x + '" cy="' + (p.y - 16) + '" r="3.4" fill="' + (on ? "#ffffff" : "#1b1f24") + '"/>' +
+        '<rect class="lbl" x="' + (p.x - p.lw / 2) + '" y="' + (p.y + 6) + '" width="' + p.lw + '" height="20" rx="5" fill="' + fill + '" stroke="#1b1f24" stroke-width="1.2"/>' +
+        '<text x="' + p.x + '" y="' + (p.y + 20) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="' + txt + '" font-family="Inter, Arial, sans-serif">' + p.short + "</text></g>";
+    });
+    return out + "</svg>";
+  }
+  function renderPlaceCard() {
+    var id = state.selected, p = PLACES[id], saved = state.saved.indexOf(id) >= 0;
+    var h = '<div class="head"><svg class="i"><use href="#i-building"/></svg><div><div class="t">' + p.nome + " · " + p.dist +
+      '</div><div class="s">' + p.tipo + " · " + p.tempo + "</div></div></div>" +
+      '<div class="lines"><div><svg class="i"><use href="#i-pin"/></svg><span>' + p.end + '</span></div>' +
+      '<div><svg class="i"><use href="#i-clock"/></svg><span>' + p.hor + "</span></div></div>";
+    if (saved) h += '<span class="chip"><svg class="i"><use href="#i-check"/></svg>Caminho salvo · funciona sem internet</span>';
+    if (state.routeMode) {
+      h += '<div class="steps-title">Caminho a pé até ' + p.nome + "</div><ol class=\"steps\">" +
+        p.steps.map(function (st) { return "<li>" + st + "</li>"; }).join("") + "</ol>";
+    }
+    if (!saved) {
+      h += '<button class="btn btn-primary" type="button" id="btn-salvar"><svg class="i"><use href="#i-download"/></svg>Salvar caminho para usar sem internet</button>';
+      h += '<button class="btn btn-secondary" type="button" id="btn-rota">' + (state.routeMode ? "Esconder caminho" : '<svg class="i"><use href="#i-route"/></svg>Ver caminho') + "</button>";
+    } else {
+      h += '<button class="btn btn-primary" type="button" id="btn-rota">' + (state.routeMode ? "Esconder caminho" : '<svg class="i"><use href="#i-route"/></svg>Ver caminho') + "</button>";
+    }
+    $("#placecard").innerHTML = h;
+  }
+  function renderMapa(params) {
+    if (params.place) state.selected = params.place;
+    if (params.route !== undefined) state.routeMode = !!params.route;
+    else if (!params.fromBack) state.routeMode = false;
+    if (!params.fromBack) { $("#busca").value = ""; setList(false); }
+    $("#mapbox").innerHTML = mapSvg();
+    renderPlaceCard();
+  }
+  function selectPlace(id) {
+    state.selected = id; state.routeMode = false;
+    setList(false);
+    $("#mapbox").innerHTML = mapSvg();
+    renderPlaceCard();
+  }
+
+  /* ---------- Tela 4b: Caminho salvo ---------- */
+  function renderSalvo() {
+    var p = PLACES[state.lastSaved || state.selected];
+    $("#salvo-txt").textContent = "O caminho até " + p.nome + " funciona mesmo sem internet. Ele fica na tela inicial, em “Meu caminho salvo”.";
+  }
+
+  /* ---------- Meus Benefícios ---------- */
+  function renderBeneficios() {
+    var el = $("#beneficios-inner");
+    if (!state.eligible) {
+      el.innerHTML = '<div class="card item"><span class="t">Nenhum auxílio consultado ainda</span>' +
+        '<span class="s">Toque no microfone na tela inicial e diga o que você precisa.</span></div>' +
+        '<div class="actions"><button class="btn btn-primary" type="button" data-home><svg class="i"><use href="#i-mic"/></svg>Pedir ajuda</button></div>';
+      return;
+    }
+    var n = DOCS.filter(function (d) { return state.docs[d.id]; }).length;
+    el.innerHTML =
+      '<div class="card item"><span class="chip"><svg class="i"><use href="#i-check"/></svg>Você pode ter direito</span>' +
+      '<span class="t">Auxílio social</span><span class="s">Próximo passo: atendimento no CRAS Esperança, Rua das Flores, 120.</span></div>' +
+      '<button class="row" type="button" data-go="documentos"><svg class="i"><use href="#i-file"/></svg><span class="txt"><span class="t">Documentos</span>' +
+      '<span class="s' + (n === 2 ? " ok" : "") + '">' + n + ' de 2 separados</span></span><svg class="i chev"><use href="#i-right"/></svg></button>' +
+      '<button class="row" type="button" data-go="documentos"><svg class="i"><use href="#i-alarm"/></svg><span class="txt"><span class="t">Lembrete</span>' +
+      '<span class="s' + (state.reminder ? " ok" : "") + '">' + (state.reminder ? fmtLembrete(state.reminder) : "Ainda não marcado") +
+      '</span></span><svg class="i chev"><use href="#i-right"/></svg></button>';
+  }
+
+  /* ---------- eventos ---------- */
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target.closest("button, [data-place]") : null;
+    if (!t) return;
+    if (t.hasAttribute("data-go")) { go(t.getAttribute("data-go")); return; }
+    if (t.hasAttribute("data-go-replace")) { go(t.getAttribute("data-go-replace"), {}, { replace: true }); return; }
+    if (t.hasAttribute("data-home")) { goHome(); return; }
+    if (t.hasAttribute("data-tab")) {
+      var tab = t.getAttribute("data-tab");
+      if (tab === "home") goHome();
+      else if (stack[stack.length - 1] !== tab) go(tab);
+      return;
+    }
+    if (t.hasAttribute("data-doc")) { toggleDoc(t.getAttribute("data-doc")); return; }
+    if (t.hasAttribute("data-day")) { sel.day = t.getAttribute("data-day"); pick("day", sel.day); return; }
+    if (t.hasAttribute("data-hour")) { sel.hour = +t.getAttribute("data-hour"); pick("hour", sel.hour); return; }
+    if (t.hasAttribute("data-place")) { selectPlace(t.getAttribute("data-place")); return; }
+    if (t.classList.contains("sug")) { $("#pedido").value = t.textContent; $("#pedido-err").hidden = true; $("#pedido").focus(); return; }
+    switch (t.id) {
+      case "btn-mic": go("ouvindo"); break;
+      case "btn-back": back(); break;
+      case "btn-stop": stopListening(); break;
+      case "btn-retry": startListening(); break;
+      case "row-saved":
+        if (state.lastSaved) go("mapa", { place: state.lastSaved, route: true });
+        else { go("mapa"); toast("Você ainda não salvou nenhum caminho. Escolha um local e toque em “Salvar caminho”."); }
+        break;
+      case "btn-ver-caminho-res": go("mapa", { place: "cras", route: true }); break;
+      case "btn-ver-caminho-lem": go("mapa", { place: "cras", route: true }); break;
+      case "btn-trocar": openSheet(); break;
+      case "btn-sheet-cancel": closeSheet(); $("#btn-trocar").focus(); break;
+      case "btn-sheet-ok":
+        state.draft = { day: sel.day, hour: sel.hour };
+        closeSheet(); renderDocs();
+        toast("Dia e horário trocados. Toque em “" + $("#btn-lembrar-txt").textContent + "” para confirmar.");
+        $("#btn-lembrar").focus();
+        break;
+      case "btn-lembrar":
+        state.reminder = { day: state.draft.day, hour: state.draft.hour };
+        save(); go("lembrete");
+        break;
+      case "btn-locais": setList($("#places").hidden); break;
+      case "btn-salvar":
+        if (state.saved.indexOf(state.selected) < 0) state.saved.push(state.selected);
+        state.lastSaved = state.selected; save();
+        go("salvo");
+        break;
+      case "btn-rota":
+        state.routeMode = !state.routeMode;
+        $("#mapbox").innerHTML = mapSvg(); renderPlaceCard();
+        $("#btn-rota").focus();
+        break;
+      case "btn-ver-agora": go("mapa", { place: state.lastSaved, route: true }, { replace: true }); break;
+      case "btn-reset-home":
+      case "btn-restart":
+        try { localStorage.removeItem(STORE); } catch (err) {}
+        state = freshState(); goHome(); toast("Protótipo reiniciado.");
+        break;
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if ((e.key === "Enter" || e.key === " ") && t && t.classList && t.classList.contains("pin")) {
+      e.preventDefault(); selectPlace(t.getAttribute("data-place"));
+    }
+    if (e.key === "Escape" && !$("#sheet").hidden) { closeSheet(); $("#btn-trocar").focus(); }
+  });
+  $("#sheet").addEventListener("click", function (e) { if (e.target === this) closeSheet(); });
+
+  $("#busca").addEventListener("input", function () {
+    var q = this.value.trim();
+    if (!q) { setList(false); return; }
+    setList(true);
+    renderPlaces(matches(q));
+  });
+  $("#busca").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      var m = matches(this.value.trim());
+      if (m.length) selectPlace(m[0]);
+    }
+  });
+
+  $("#form-digitar").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = $("#pedido").value.trim();
+    if (!v) { $("#pedido-err").hidden = false; $("#pedido").focus(); return; }
+    state.said = v; state.via = "texto"; save();
+    $("#pedido").value = "";
+    go("assistente", { fresh: true }, { replace: true });
+  });
+
+  /* ---------- início ---------- */
+  load();
+  if (STANDALONE) { try { history.replaceState({ n: 1 }, ""); } catch (e) {} }
+  show("home", { noFocus: true });
+})();
+</script>
+
+</body>
+</html>
